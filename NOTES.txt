@@ -1,0 +1,7 @@
+Var_List must be s1 connected
+
+You will not add more nodes, only use next when appropriate
+
+s1 may point to other Vars
+
+NO "if" in PT function!

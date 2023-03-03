@@ -46,6 +46,18 @@ void PT(int howmany)
 //          Typically used in formatted printing
 char * ASTtypeToString(enum ASTtype mytype)
 {
+  switch(mytype)
+  {
+    case A_INTTYPE:
+                  return "int";
+                  break;
+    case A_VOIDTYPE:
+                  return "void";
+                  break;
+
+    default: printf("ASTtypeToString UNKNOWN type FIX FIX FIX FIX FIX\n");
+             return "UNKNOWN TYPE";
+  }
     // Missing
 
 }
@@ -64,12 +76,18 @@ void ASTprint(int level,ASTnode *p)
      { 
        switch (p->type) {
         case A_VARDEC : 
-                      PT(level); printf("Variable ");
-                     break;
+                      PT(level);
+                      printf("Variable %s %s\n", ASTtypeToString(p->my_data_type), p->name);
+                      ASTprint(level, p->s1);
+                      ASTprint(level, p->next);
+                      break;
+                      
         case A_FUNCTIONDEC :  
                        PT(level);
-                     break;
-        default: printf("unknown AST Node type %d in ASTprint\n", p->type);
+                       break;
+
+        default:
+              printf("unknown AST Node type %d in ASTprint\n", p->type);
 
 
        }

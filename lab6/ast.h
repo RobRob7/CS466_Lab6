@@ -34,7 +34,7 @@ enum AST_OPERATORS {
 };
 
 enum AST_MY_DATA_TYPE {
-   A_BOOLTYPE,
+   A_INTTYPE,
    A_VOIDTYPE
 
 };

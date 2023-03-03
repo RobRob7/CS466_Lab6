@@ -24,6 +24,7 @@ int mydebug = 0;
 // variable keeps track of line number
 int lineno = 1;
 
+#include "ast.h"
 #include "y.tab.h"
 %}
 

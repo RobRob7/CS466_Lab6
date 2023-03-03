@@ -27,6 +27,10 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#include "ast.h"
+
+ASTnode *PROGRAM = NULL;
+
 int yylex();
 
 // external variables coming from lab5.l (LEX)
@@ -45,6 +49,8 @@ void yyerror (s)  /* Called by yyparse on error */
 %union {
 	int value;
 	char* string;
+	ASTnode* node;
+	enum AST_MY_DATA_TYPE input_type;
 }
 
 // start symbol
@@ -73,31 +79,57 @@ void yyerror (s)  /* Called by yyparse on error */
 %token T_DIV
 %token T_STRING
 
+%type <node> Var_List Var_Declaration Declaration Declaration_List
+%type <input_type> Type_Specifier
+
 %%	/* end specs, begin rules */
 
-Program : Declaration_List
+Program : Declaration_List { PROGRAM = $1; }
 		;
 
-Declaration_List : Declaration
+Declaration_List : Declaration { $$ = $1; }
 				 | Declaration Declaration_List
+				   {
+				 		$$ = $1;
+						$$->next = $2;
+				   }
 				 ;
 
-Declaration : Var_Declaration
-			| Fun_Declaration
-			| Fun_Declaration_Proto
+Declaration : Var_Declaration { $$ = $1; }
+			| Fun_Declaration { $$ = NULL; }
+			| Fun_Declaration_Proto { $$ = NULL; }
 			;
 
 Var_Declaration : Type_Specifier Var_List ';'
+				  { //add type to all elements in the list
+						ASTnode *p;
+						p = $2;
+						while(p != NULL)
+						{
+							p->my_data_type = $1;
+							p = p->s1;
+						}
+						$$ = $2;
+				  }
 				;
 
-Var_List : T_ID	{ printf("Var_LIST with value %s\n", $1); }
+Var_List : T_ID
+		   { 
+				$$ = ASTCreateNode(A_VARDEC);
+				$$->name = $1;
+ 		   }
 		 | T_ID '[' T_NUM ']' { printf("Var_LIST with value %s\n", $1); }
-		 | T_ID ',' Var_List { printf("Var_LIST with value %s\n", $1); }
+		 | T_ID ',' Var_List
+		   { 
+				$$ = ASTCreateNode(A_VARDEC);
+				$$->name = $1;
+				$$->s1 = $3;
+		   }
 		 | T_ID '[' T_NUM ']' ',' Var_List { printf("Var_LIST with value %s\n", $1); }
 		 ;
 
-Type_Specifier : T_INT
-			   | T_VOID
+Type_Specifier : T_INT { $$ = A_INTTYPE; }
+			   | T_VOID { $$ = A_VOIDTYPE; }
 			   ;
 
 Fun_Declaration : Type_Specifier T_ID '(' Params ')' Compound_Stmt { printf("FunDec with value %s\n", $2); }
@@ -222,4 +254,5 @@ Arg_List : Expression
 int main()
 { 
 	yyparse();
+	ASTprint(0, PROGRAM);
 }
